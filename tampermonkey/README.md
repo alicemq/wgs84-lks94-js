@@ -10,8 +10,7 @@ Userscripts that convert WGS84 (Google Maps) coordinates to LKS-94 and open loca
    - [Chrome – Tampermonkey](https://chromewebstore.google.com/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo)
    - [Edge – Tampermonkey](https://microsoftedge.microsoft.com/addons/detail/tampermonkey/iikmkjmpaadaobahmlepeloendndfphd)
    - [Firefox – Tampermonkey](https://addons.mozilla.org/firefox/addon/tampermonkey/)
-2. Click the ***Install*** link below script name.
-3. Paste the script content, or install from the raw GitHub URL (see **Install** below). Save; the script runs on the sites listed in its `@match` headers.
+2. Click the ***Install*** link below script name, click install in next window.
 
 ---
 
@@ -23,4 +22,3 @@ Userscripts that convert WGS84 (Google Maps) coordinates to LKS-94 and open loca
 | **Google Maps → Regia.lt** [*Install*](https://raw.githubusercontent.com/alicemq/wgs84-lks94-js/main/tampermonkey/google-maps-regia.user.js) | On [Google Maps](https://www.google.com/maps): adds **“Open in Regia.lt”** to the right‑click context menu. Right‑click a place on the map → choose the new item to open that location in Regia.lt (LKS-94). Handy when you have a point on the map and want the same spot in Regia. |
 
 Both scripts rely on the shared library `wgs84-lks94-lib.js` (loaded via `@require` from the repo); they only run on their specified sites.
-
