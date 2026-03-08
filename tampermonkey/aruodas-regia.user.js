@@ -1,13 +1,16 @@
 // ==UserScript==
 // @name         Aruodas → Regia.lt (LKS-94)
 // @namespace    http://tampermonkey.net/
-// @version      1.0.0
+// @version      1.1.0
 // @description  Add Regia.lt button on aruodas.lt listing pages; convert Google Maps coords to LKS-94 and open in regia.lt
 // @match        https://www.aruodas.lt/*
 // @match        https://aruodas.lt/*
 // @grant        none
 // @run-at       document-idle
 // @require      https://raw.githubusercontent.com/alicemq/wgs84-lks94-js/main/lib/wgs84-lks94-lib.js
+// @updateURL    https://raw.githubusercontent.com/alicemq/wgs84-lks94-js/main/tampermonkey/aruodas-regia.user.js
+// @downloadURL  https://raw.githubusercontent.com/alicemq/wgs84-lks94-js/main/tampermonkey/aruodas-regia.user.js
+// @supportURL   https://github.com/alicemq/wgs84-lks94-js
 // ==/UserScript==
 
 (function () {

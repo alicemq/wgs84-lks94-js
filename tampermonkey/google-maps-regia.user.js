@@ -1,13 +1,16 @@
 // ==UserScript==
 // @name         Google Maps → Regia.lt (LKS-94)
 // @namespace    http://tampermonkey.net/
-// @version      1.0.0
+// @version      1.1.0
 // @description  Add "Open in Regia.lt" to Google Maps right-click context menu
 // @match        https://www.google.com/maps/*
 // @match        https://google.com/maps/*
 // @grant        none
 // @run-at       document-idle
 // @require      https://raw.githubusercontent.com/alicemq/wgs84-lks94-js/main/lib/wgs84-lks94-lib.js
+// @updateURL    https://raw.githubusercontent.com/alicemq/wgs84-lks94-js/main/tampermonkey/google-maps-regia.user.js
+// @downloadURL  https://raw.githubusercontent.com/alicemq/wgs84-lks94-js/main/tampermonkey/google-maps-regia.user.js
+// @supportURL   https://github.com/alicemq/wgs84-lks94-js
 // ==/UserScript==
 
 (function () {
@@ -120,10 +123,33 @@
     }
   }
 
-  function setupMapsContextMenuObserver() {
+  const OBSERVER_TIMEOUT_MS = 4000;
+  let cancelCurrentSession = null;
+
+  function runObserverSession() {
+    if (cancelCurrentSession) {
+      cancelCurrentSession();
+      cancelCurrentSession = null;
+    }
     if (!/google\.com\/maps|maps\.google/i.test(location.href)) return;
 
     const observedRoots = new WeakSet();
+    let observer = null;
+    let timeoutId = null;
+    let done = false;
+
+    function stopObserving() {
+      if (done) return;
+      done = true;
+      if (cancelCurrentSession === stopObserving) cancelCurrentSession = null;
+      if (timeoutId) clearTimeout(timeoutId);
+      timeoutId = null;
+      if (observer) {
+        observer.disconnect();
+        observer = null;
+      }
+      debugLog('observer stopped');
+    }
 
     function collectShadowRoots(el, out) {
       if (!el || out.has(el)) return;
@@ -137,7 +163,7 @@
     }
 
     function processMenu(menu) {
-      if (!menu || menu.dataset.regiaInjected === '1') return false;
+      if (done || !menu || menu.dataset.regiaInjected === '1') return false;
       if (isMapsContextMenu(menu)) {
         injectRegiaIntoMapsMenu(menu);
         return true;
@@ -154,14 +180,15 @@
       const candidates = findMenuCandidates(root);
       for (const menu of candidates) {
         if (processMenu(menu)) return true;
-        setTimeout(() => processMenu(menu), 50);
-        setTimeout(() => processMenu(menu), 150);
+        if (done) return true;
+        setTimeout(() => { if (!done) processMenu(menu); }, 50);
+        setTimeout(() => { if (!done) processMenu(menu); }, 150);
       }
       return false;
     }
 
     function observeRoot(root) {
-      if (!root || observedRoots.has(root)) return;
+      if (done || !root || observedRoots.has(root)) return;
       try {
         observer.observe(root, { childList: true, subtree: true });
         observedRoots.add(root);
@@ -170,31 +197,45 @@
       } catch (_) {}
     }
 
-    const observer = new MutationObserver((mutations) => {
+    observer = new MutationObserver((mutations) => {
+      if (done) return;
       for (const mut of mutations) {
         for (const node of mut.addedNodes) {
           if (node.nodeType !== Node.ELEMENT_NODE) continue;
           const roots = new Set();
           collectShadowRoots(node, roots);
           for (const root of roots) observeRoot(root);
-          if (scanRootForMenus(node)) break;
+          if (scanRootForMenus(node)) {
+            stopObserving();
+            return;
+          }
           for (const root of roots) {
-            if (root !== node && root !== document.body) scanRootForMenus(root);
+            if (root !== node && root !== document.body && !done) {
+              if (scanRootForMenus(root)) {
+                stopObserving();
+                return;
+              }
+            }
           }
         }
       }
     });
 
     observeRoot(document.body);
-    debugLog('observer started. Enable debug: localStorage.setItem("regiaLks94Debug","1")');
-    if (DEBUG && document.querySelectorAll('iframe').length) {
-      debugLog('page has', document.querySelectorAll('iframe').length, 'iframe(s).');
-    }
+    timeoutId = setTimeout(stopObserving, OBSERVER_TIMEOUT_MS);
+    cancelCurrentSession = stopObserving;
+    debugLog('observer started (on contextmenu)');
+  }
+
+  function onContextMenu() {
+    runObserverSession();
   }
 
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', setupMapsContextMenuObserver);
+    document.addEventListener('DOMContentLoaded', function () {
+      document.addEventListener('contextmenu', onContextMenu, true);
+    });
   } else {
-    setupMapsContextMenuObserver();
+    document.addEventListener('contextmenu', onContextMenu, true);
   }
 })();
