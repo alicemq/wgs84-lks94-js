@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Aruodas → Regia.lt (LKS-94)
 // @namespace    http://tampermonkey.net/
-// @version      1.2.0
+// @version      1.3.0
 // @description  Add Regia.lt button on aruodas.lt listing pages; convert Google Maps coords to LKS-94 and open in regia.lt
 // @match        https://www.aruodas.lt/*
 // @match        https://aruodas.lt/*
