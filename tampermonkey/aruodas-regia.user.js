@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Aruodas → Regia.lt (LKS-94)
 // @namespace    http://tampermonkey.net/
-// @version      1.3.0
+// @version      1.4.0
 // @description  Add Regia.lt button on aruodas.lt listing pages; convert Google Maps coords to LKS-94 and open in regia.lt
 // @match        https://www.aruodas.lt/*
 // @match        https://aruodas.lt/*
@@ -189,6 +189,19 @@
     style.textContent = [
       '.obj-photos.lks94-regia-visible .img-popup[data-type="visible"] { display: none !important; }',
       '.obj-photos.lks94-regia-visible .img-next, .obj-photos.lks94-regia-visible .img-back { height: 68px !important; top: 215px !important; transform: translateY(-50%) !important; bottom: auto !important; z-index: 10 !important; pointer-events: auto !important; }',
+    ].join('\n');
+    document.head.appendChild(style);
+  }
+
+  function injectAruodasPhotoStyles() {
+    if (document.getElementById('lks94-aruodas-photo-styles')) return;
+    const style = document.createElement('style');
+    style.id = 'lks94-aruodas-photo-styles';
+    style.textContent = [
+      '.obj-thumbs__wrapper { z-index: 3 !important; position: relative !important; }',
+      '.obj-photos .img-popup { top: 0 !important; left: 0 !important; width: 100% !important; height: 100% !important; margin-left: 0 !important; }',
+      '.obj-photos .obj-img.animate { min-height: 100vh !important; height: 100vh !important; width: 100% !important; display: block !important; }',
+      '.obj-photos .obj-img.animate .obj-photo-big { width: 100% !important; height: 100% !important; display: block !important; object-fit: contain !important; object-position: center !important; }',
     ].join('\n');
     document.head.appendChild(style);
   }
@@ -654,11 +667,13 @@
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', function () {
+      injectAruodasPhotoStyles();
       initFilmstrip();
       scheduleFilmstripRetry();
       observeFullscreenGallery();
     });
   } else {
+    injectAruodasPhotoStyles();
     initFilmstrip();
     scheduleFilmstripRetry();
     observeFullscreenGallery();
