@@ -7,9 +7,8 @@
 // @match        https://google.com/maps/*
 // @grant        none
 // @run-at       document-idle
-// @require      regia-lks94-lib.js
+// @require      https://raw.githubusercontent.com/alicemq/wgs84-lks94-js/main/lib/wgs84-lks94-lib.js
 // ==/UserScript==
-// Update @require to the full URL of regia-lks94-lib.js (e.g. raw GitHub or your host).
 
 (function () {
   'use strict';
